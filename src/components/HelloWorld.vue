@@ -1,25 +1,32 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <input @change="selectedFile" name="file" type="file">
+    <input @change="selectedFile" name="file" type="file" multiple>
+
+    <div class="imageview-container">
+      <image-view v-for="(buffer, index) in buffers" :key="index" :arrayBuffer="buffer" />
+    </div>
   </div>
 </template>
 
 <script>
-import PngParser from './../utils/PngParser.js'
+import ImageView from './ImageView.vue'
 
 export default {
   name: 'HelloWorld',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App'
+      msg: 'Welcome to Your Vue.js App',
+      buffers: []
     }
   },
   methods: {
     selectedFile: function (event) {
-      console.log(`start reading ${event.target.files.length} files`)
       event.preventDefault()
       
+      console.log(`start reading ${event.target.files.length} files`)
+      
+      this.buffers = []
       for (const file of event.target.files) {
         this.readFile(file)
       }
@@ -29,20 +36,13 @@ export default {
       reader.onload = (e) => {
         console.log(`file loaded: { name: ${file.name}, size: ${file.size} }`)
 
-        const parser = new PngParser(e.target.result)
-
-        if (!parser.validateIsPng()) {
-          console.log('This file is not PNG!')
-          return
-        }
-
-        const ihdr = parser.readIHDRChunkData()
-        console.log(ihdr)
-
-        parser.showInformation()
+        this.buffers.push(e.target.result)
       }
       reader.readAsArrayBuffer(file)
     }
+  },
+  components: {
+    'image-view': ImageView
   }
 }
 </script>

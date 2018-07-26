@@ -15,13 +15,22 @@ export default {
   },
   computed: {
     imageSrc: function() {
+      if (!this.arrayBuffer) {
+        return ""
+      }
       return 'data:image/png;base64,' + btoa(Array.from(new Uint8Array(this.arrayBuffer), e => String.fromCharCode(e)).join(''))
     },
   },
   props: ['arrayBuffer'],
   methods: {
+    reload() {
+      this.readProps(this.arrayBuffer)
+    },
     readProps(arrayBuffer) {
-      const parser = new PngParser(e.target.result)
+      if (!arrayBuffer) {
+        return
+      }
+      const parser = new PngParser(arrayBuffer)
 
       if (!parser.validateIsPng()) {
         console.log('This file is not PNG!')

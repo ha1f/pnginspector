@@ -1,6 +1,7 @@
 <template>
   <div class="imageview">
     <img :src="imageSrc">
+    <div>{{ imageParams }}</div>
   </div>
 </template>
 
@@ -20,12 +21,12 @@ export default {
       }
       return 'data:image/png;base64,' + btoa(Array.from(new Uint8Array(this.arrayBuffer), e => String.fromCharCode(e)).join(''))
     },
+    imageParams: function() {
+      return this.readProps(this.arrayBuffer)
+    }
   },
   props: ['arrayBuffer'],
   methods: {
-    reload() {
-      this.readProps(this.arrayBuffer)
-    },
     readProps(arrayBuffer) {
       if (!arrayBuffer) {
         return
@@ -41,6 +42,7 @@ export default {
       console.log(ihdr)
 
       parser.showInformation()
+      return parser.getChunks()
     }
   }
 }

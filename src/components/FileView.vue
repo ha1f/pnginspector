@@ -23,13 +23,12 @@ export default {
   },
   props: ['file', 'version'],
   mounted () {
+    console.log('fileview: mounted')
     this.reload()
   },
   beforeUpdate () {
+    console.log('fileview: beforeUpdate', this.file.name)
     this.reload()
-  },
-  updated() {
-    this.$refs.imageview.reload()
   },
   methods: {
     reload: function() {

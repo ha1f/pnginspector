@@ -95,6 +95,24 @@ export default class PngParser {
     }
     return chunks;
   }
+  getChunkInformation() {
+    let results = []
+    const chunks = this.getChunks();
+    let ihdr = null
+    for (const chunk of chunks) {
+      console.log(chunk);
+      if (chunk.type === 'IHDR') {
+        ihdr = this.readIHDRChunkData(chunk.dataOffset);
+        results.push(Object.assign(chunk, ihdr));
+      } else if (chunk.type === 'tRNS') {
+        const trns = readtRNSChunkData(chunk.dataOffset, chunk.size, ihdr.colorType || 3)
+        results.push(Object.assign(chunk, { values: trns }));
+      } else {
+        results.push(chunk);
+      }
+    }
+    return results
+  }
   showInformation() {
     const chunks = this.getChunks();
     for (const chunk of chunks) {

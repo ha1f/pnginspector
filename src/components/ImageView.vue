@@ -35,14 +35,10 @@ export default {
 
       if (!parser.validateIsPng()) {
         console.log('This file is not PNG!')
-        return
+        return ""
       }
 
-      const ihdr = parser.readIHDRChunkData()
-      console.log(ihdr)
-
-      parser.showInformation()
-      return parser.getChunks()
+      return parser.getChunkInformation()
     }
   }
 }

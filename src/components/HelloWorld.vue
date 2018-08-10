@@ -1,6 +1,5 @@
 <template>
   <div class="hello">
-    <h1>{{ msg }}</h1>
     <input @change="selectedFile" name="file" type="file" multiple>
 
     <div class="fileview-container">
@@ -16,7 +15,6 @@ export default {
   name: 'HelloWorld',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App',
       files: [],
       version: 0
     }

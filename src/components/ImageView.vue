@@ -1,7 +1,9 @@
 <template>
   <div class="imageview">
     <img :src="imageSrc">
-    <div>{{ imageParams }}</div>
+    <div v-for="(chunk, index) in chunks" :key="index">
+      {{ chunk }}
+    </div>
   </div>
 </template>
 
@@ -21,7 +23,7 @@ export default {
       }
       return 'data:image/png;base64,' + btoa(Array.from(new Uint8Array(this.arrayBuffer), e => String.fromCharCode(e)).join(''))
     },
-    imageParams: function() {
+    chunks: function() {
       return this.readProps(this.arrayBuffer)
     }
   },
@@ -35,7 +37,7 @@ export default {
 
       if (!parser.validateIsPng()) {
         console.log('This file is not PNG!')
-        return ""
+        return []
       }
 
       return parser.getChunkInformation()

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
+    <p>↓ファイルを選択して下さい↓</p>
     <router-view/>
   </div>
 </template>

@@ -47,6 +47,17 @@ export default class PngParser {
   getUint8Array(offset, number) {
     return Array(number).fill(0).map((v, i) => this.getUint8(offset + i));
   }
+  getStringWhile(offset, condition) {
+    let result = [];
+    let i = 0;
+    let data = this.getUint8(offset + i);
+    while (condition(data)) {
+      result.push(data);
+      i += 1;
+      data = this.getUint8(offset + i);
+    }
+    return { text: result.map((v, i) => String.fromCharCode(v)).join(''), endOffset: offset + i };
+  }
   readIHDRChunkData(offset = 0x10) {
     return {
       width: this.getUint32(offset),
@@ -65,6 +76,65 @@ export default class PngParser {
     } else {
       return Array(size / 2).fill(0).map((v, i) => this.getUint16(offset + (i * 2)));
     }
+  }
+  readFctlChunkData(offset) {
+    return {
+      sequence_number: this.getUint32(offset),
+      width: this.getUint32(offset + 4),
+      height: this.getUint32(offset + 8),
+      xOffset: this.getUint32(offset + 12),
+      yOffset: this.getUint32(offset + 16),
+      delayNum: this.getUint16(offset + 20),
+      delayDen: this.getUint16(offset + 22),
+      disposeOp: this.getUint8(offset + 24),
+      blendOp: this.getUint8(offset + 25)
+    };
+  }
+  readActlChunkData(offset) {
+    return {
+      numFrames: this.getUint32(offset),
+      numPlays: this.getUint32(offset)
+    };
+  }
+  readTextChunkData(offset, length) {
+    // https://www.setsuki.com/hsp/ext/chunk/tEXt.htm
+    return {
+      text: this.getString(offset, length)
+    };
+  }
+  readItxtChunkData(offset) {
+    let result = this.getStringWhile(offset, ((v) => v != 0));
+    const keyword = result.text;
+    const compressionFlag = this.getUint8(result.endOffset + 1);
+    const compressionMethod = this.getUint8(result.endOffset + 2);
+    result = this.getStringWhile(result.endOffset + 3, ((v) => v != 0));
+    const languageTag = result.text;
+    result = this.getStringWhile(result.endOffset, ((v) => v != 0));
+    const translatedKeyword = result.text;
+    result = this.getStringWhile(result.endOffset, ((v) => v != 0));
+    const text = result.text;
+    return {
+      keyword: keyword,
+      compressionFlag: compressionFlag,
+      compressionMethod: compressionMethod,
+      languageTag: languageTag,
+      translatedKeyword: translatedKeyword,
+      text: text
+    };
+  }
+  readChrmChunkData(offset) {
+    return {
+      whilePoint: { x: this.getUint32(offset + 0), y: this.getUint32(offset + 4) },
+      red: { x: this.getUint32(offset + 8), y: this.getUint32(offset + 12) },
+      green: { x: this.getUint32(offset + 16), y: this.getUint32(offset + 20) },
+      blue: { x: this.getUint32(offset + 24), y: this.getUint32(offset + 28) }
+    };
+  }
+  readPhysChunkData(offset) {
+    return {
+      pixelsPerUnit: { x: this.getUint32(offset + 0), y: this.getUint32(offset + 4) },
+      unitSpecifier: this.getUint8(offset + 8)
+    };
   }
   readChunk(offset) {
     let currentOffset = offset;
@@ -105,13 +175,31 @@ export default class PngParser {
         ihdr = this.readIHDRChunkData(chunk.dataOffset);
         results.push(Object.assign(chunk, ihdr));
       } else if (chunk.type === 'tRNS') {
-        const trns = readtRNSChunkData(chunk.dataOffset, chunk.size, ihdr.colorType || 3)
+        const trns = this.readtRNSChunkData(chunk.dataOffset, chunk.size, ihdr.colorType || 3);
         results.push(Object.assign(chunk, { values: trns }));
+      } else if (chunk.type == 'fcTL') {
+        const fctl = this.readFctlChunkData(chunk.dataOffset);
+        results.push(Object.assign(chunk, fctl));
+      } else if (chunk.type == 'acTL') {
+        const actl = this.readActlChunkData(chunk.dataOffset);
+        results.push(Object.assign(chunk, actl));
+      } else if (chunk.type == 'tEXt') {
+        const text = this.readTextChunkData(chunk.dataOffset, chunk.size);
+        results.push(Object.assign(chunk, text));
+      } else if (chunk.type == 'iTXt') {
+        const itxt = this.readItxtChunkData(chunk.dataOffset);
+        results.push(Object.assign(chunk, itxt));
+      } else if (chunk.type == 'cHRM') {
+        const chrm = this.readChrmChunkData(chunk.dataOffset);
+        results.push(Object.assign(chunk, chrm));
+      } else if (chunk.type == 'pHYs') {
+        const phys =this.readPhysChunkData(chunk.dataOffset);
+        results.push(Object.assign(chunk, phys));
       } else {
         results.push(chunk);
       }
     }
-    return results
+    return results;
   }
   showInformation() {
     const chunks = this.getChunks();

@@ -1,6 +1,6 @@
 <template>
   <div class="fileview">
-    <span>{{ filename }}</span>
+    <h2>{{ filename }}</h2>
     <image-view :arrayBuffer="arrayBuffer"  ref="imageview" />
   </div>
 </template>
@@ -52,4 +52,7 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.fileview {
+  margin: 50px;
+}
 </style>

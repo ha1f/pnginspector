@@ -70,6 +70,14 @@ export default class PngParser {
       crc: this.getUint32(offset + 13),
     };
   }
+  readPlteChunkData(offset, length) {
+    let colors = [];
+    const maxI = length -  2;
+    for (let i=0; i < maxI; i += 3) {
+      colors.push({ red: this.getUint8(offset + i), green: this.getUint8(offset + i + 1), blue: this.getUint8(offset + i + 2) });
+    }
+    return colors;
+  }
   readtRNSChunkData(offset, size, colorType) {
     if (colorType === 3) {
       return Array(size).fill(0).map((v, i) => this.getUint8(offset + i));
@@ -193,8 +201,11 @@ export default class PngParser {
         const chrm = this.readChrmChunkData(chunk.dataOffset);
         results.push(Object.assign(chunk, chrm));
       } else if (chunk.type == 'pHYs') {
-        const phys =this.readPhysChunkData(chunk.dataOffset);
+        const phys = this.readPhysChunkData(chunk.dataOffset);
         results.push(Object.assign(chunk, phys));
+      } else if (chunk.type == 'PLTE') {
+        const plte = this.readPlteChunkData(chunk.dataOffset, chunk.size);
+        results.push(Object.assign(chunk, { values: plte }));
       } else {
         results.push(chunk);
       }

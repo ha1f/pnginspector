@@ -79,7 +79,7 @@ export default class PngParser {
   }
   readFctlChunkData(offset) {
     return {
-      sequence_number: this.getUint32(offset),
+      sequenceNumber: this.getUint32(offset),
       width: this.getUint32(offset + 4),
       height: this.getUint32(offset + 8),
       xOffset: this.getUint32(offset + 12),

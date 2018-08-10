@@ -61,6 +61,7 @@ export default {
 <style scoped>
 img {
   max-width: 800px;
+  max-width: 85%;
   max-height: 800px;
 }
 .chunk-container {

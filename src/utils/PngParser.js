@@ -178,7 +178,6 @@ export default class PngParser {
     const chunks = this.getChunks();
     let ihdr = null
     for (const chunk of chunks) {
-      console.log(chunk);
       if (chunk.type === 'IHDR') {
         ihdr = this.readIHDRChunkData(chunk.dataOffset);
         results.push(Object.assign(chunk, ihdr));

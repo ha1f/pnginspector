@@ -1,6 +1,6 @@
 <template>
   <div class="fileview">
-    <h2>{{ filename }}</h2>
+    <h2>{{ filename }} ( {{ filesize.toLocaleString() }} bytes )</h2>
     <image-view :arrayBuffer="arrayBuffer"  ref="imageview" />
   </div>
 </template>
@@ -19,6 +19,9 @@ export default {
   computed: {
     filename: function() {
       return this.file.name
+    },
+    filesize: function() {
+      return this.file.size
     }
   },
   props: ['file', 'version'],
